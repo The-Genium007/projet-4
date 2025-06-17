@@ -43,6 +43,8 @@ function showError(input, message) {
   input.classList.add("error-input");
 }
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("form");
 
@@ -97,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
       showError(terms, "Vous devez vérifier que vous acceptez les termes et conditions.");
       isValid = false;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    if (!emailRegex.test(formData.email)) {
       const email = document.getElementById("email");
       showError(email, "Veuillez entrer une adresse email valide.");
       isValid = false;
@@ -119,7 +121,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const closeButton = document.createElement("button");
       closeButton.className = "button";
       closeButton.textContent = "Fermer";
-      closeButton.addEventListener("click", closeModal);
+      closeButton.addEventListener("click", function () {
+        // Fermeture de la modale
+        closeModal();
+        // Rendre le formulaire visible
+        form.style.display = "block";
+
+        // Rend invisible le bouton fermer et message
+        closeButton.style.display = "none";
+        successMessage.style.display = "none";
+
+        // Nettoyage du formulaire 
+        form.reset()
+      });
 
       // Ajouter le bouton au message de validation
       successMessage.appendChild(closeButton);
