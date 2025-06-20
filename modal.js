@@ -28,19 +28,26 @@ function closeModal() {
 
 // Reusable error function
 function showError(input, message) {
-  // Remove existing error messages
-  const existingError = input.parentNode.querySelector(".error-message");
-  if (existingError) existingError.remove();
+  let errorTarget;
+  if (input.id === "checkbox1") {
+    errorTarget = document.querySelector('label[for="checkbox1"]');
+  } else {
+    errorTarget = input;
+  }
 
-  // Create error message
+  // Create a error message
   const error = document.createElement("div");
   error.className = "error-message";
   error.textContent = message;
 
-  // Insert message after the input
-  input.parentNode.appendChild(error);
+  // Insert the error message in the correct place
+  if (input.id === "checkbox1") {
+    errorTarget.insertAdjacentElement('afterend', error);
+    error.classList.add("error-correction"); // Correction space bottom checkbox
+  } else {
+    errorTarget.parentNode.appendChild(error);
+  }
 
-  // Add error class to the input
   input.classList.add("error-input");
 }
 
@@ -93,15 +100,19 @@ function showSuccessMessage(form) {
   successMessage.className = "success-message";
   successMessage.textContent = "Merci pour votre inscription";
   form.parentNode.appendChild(successMessage);
+
   const closeButton = document.createElement("button");
   closeButton.className = "button";
   closeButton.textContent = "Fermer";
+
   closeButton.addEventListener("click", function () {
     closeModal();
+
     form.style.display = "block";
     closeButton.style.display = "none";
     successMessage.style.display = "none";
   });
+
   successMessage.appendChild(closeButton);
 }
 
@@ -111,6 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     clearErrors();
+
     const formData = {
       firstName: document.getElementById("first").value.trim(),
       lastName: document.getElementById("last").value.trim(),
@@ -121,6 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
       termsAccepted: document.getElementById("checkbox1").checked,
       wantsNewsletter: document.getElementById("checkbox2").checked,
     };
+
     if (validateFormFields(formData, form)) {
       showSuccessMessage(form);
     }
