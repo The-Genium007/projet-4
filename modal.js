@@ -23,6 +23,7 @@ function launchModal() {
 // Close modal
 function closeModal() {
   modalbg.style.display = "none";
+  form.reset();
 }
 
 // Reusable error function
@@ -43,20 +44,73 @@ function showError(input, message) {
   input.classList.add("error-input");
 }
 
+// Clear errors inputs
+function clearErrors() {
+  document.querySelectorAll(".error-message").forEach((el) => el.remove());
+  document.querySelectorAll(".error-input").forEach((el) => el.classList.remove("error-input"));
+}
+
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Field validation
+function validateFormFields(formData, form) {
+  let isValid = true;
+  if (formData.firstName.length < 2) {
+    showError(document.getElementById("first"), "Veuillez entrer 2 caractères ou plus pour le champ du prénom.");
+    isValid = false;
+  }
+  if (formData.lastName.length < 2) {
+    showError(document.getElementById("last"), "Veuillez entrer 2 caractères ou plus pour le champ du nom.");
+    isValid = false;
+  }
+  if (!formData.birthdate) {
+    showError(document.getElementById("birthdate"), "Vous devez entrer votre date de naissance.");
+    isValid = false;
+  }
+  if (!formData.quantity) {
+    showError(document.getElementById("quantity"), "Veuillez entrer une quantité.");
+    isValid = false;
+  }
+  if (!formData.location) {
+    showError(form.querySelector('input[name="location"]'), "Vous devez choisir une option.");
+    isValid = false;
+  }
+  if (!formData.termsAccepted) {
+    showError(document.getElementById("checkbox1"), "Vous devez vérifier que vous acceptez les termes et conditions.");
+    isValid = false;
+  }
+  if (!emailRegex.test(formData.email)) {
+    showError(document.getElementById("email"), "Veuillez entrer une adresse email valide.");
+    isValid = false;
+  }
+  return isValid;
+}
+
+// Display success message 
+function showSuccessMessage(form) {
+  form.style.display = "none";
+  const successMessage = document.createElement("div");
+  successMessage.className = "success-message";
+  successMessage.textContent = "Merci pour votre inscription";
+  form.parentNode.appendChild(successMessage);
+  const closeButton = document.createElement("button");
+  closeButton.className = "button";
+  closeButton.textContent = "Fermer";
+  closeButton.addEventListener("click", function () {
+    closeModal();
+    form.style.display = "block";
+    closeButton.style.display = "none";
+    successMessage.style.display = "none";
+  });
+  successMessage.appendChild(closeButton);
+}
+
+// Form management
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("form");
-
   form.addEventListener("submit", function (e) {
-    e.preventDefault(); // Prevent form submission/reload
-
-    // Remove old error messages
-    document.querySelectorAll(".error-message").forEach((el) => el.remove());
-    document.querySelectorAll(".error-input").forEach((el) => el.classList.remove("error-input"));
-    let isValid = true;
-
-    // Regroupement des valeur du formulaire
+    e.preventDefault();
+    clearErrors();
     const formData = {
       firstName: document.getElementById("first").value.trim(),
       lastName: document.getElementById("last").value.trim(),
@@ -67,76 +121,8 @@ document.addEventListener("DOMContentLoaded", () => {
       termsAccepted: document.getElementById("checkbox1").checked,
       wantsNewsletter: document.getElementById("checkbox2").checked,
     };
-
-    // Verification input
-    if (formData.firstName.length < 2) {
-      const last = document.getElementById("first");
-      showError(last, "Veuillez entrer 2 caractères ou plus pour le champ du prénom.");
-      isValid = false;
-    }
-    if (formData.lastName.length < 2) {
-      const last = document.getElementById("last");
-      showError(last, "Veuillez entrer 2 caractères ou plus pour le champ du nom.");
-      isValid = false;
-    }
-    if (!formData.birthdate) {
-      const birth = document.getElementById("birthdate");
-      showError(birth, "Vous devez entrer votre date de naissance.");
-      isValid = false;
-    }
-    if (!formData.quantity) {
-      const last = document.getElementById("quantity");
-      showError(last, "Veuillez entrer une quantité.");
-      isValid = false;
-    }
-    if (!formData.location) {
-      const location = form.querySelector('input[name="location"]');
-      showError(location, "Vous devez choisir une option.");
-      isValid = false;
-    }
-    if (!formData.termsAccepted) {
-      const terms = document.getElementById("checkbox1");
-      showError(terms, "Vous devez vérifier que vous acceptez les termes et conditions.");
-      isValid = false;
-    }
-    if (!emailRegex.test(formData.email)) {
-      const email = document.getElementById("email");
-      showError(email, "Veuillez entrer une adresse email valide.");
-      isValid = false;
-    }
-
-    if (isValid) {
-      // Rendre le formulaire invisible
-      form.style.display = "none";
-
-      // Créer un message de validation
-      const successMessage = document.createElement("div");
-      successMessage.className = "success-message";
-      successMessage.textContent = "Merci pour votre inscription";
-
-      // Ajouter le message de validation au conteneur du formulaire
-      form.parentNode.appendChild(successMessage);
-
-      // Ajouter un bouton pour fermer la modal
-      const closeButton = document.createElement("button");
-      closeButton.className = "button";
-      closeButton.textContent = "Fermer";
-      closeButton.addEventListener("click", function () {
-        // Fermeture de la modale
-        closeModal();
-        // Rendre le formulaire visible
-        form.style.display = "block";
-
-        // Rend invisible le bouton fermer et message
-        closeButton.style.display = "none";
-        successMessage.style.display = "none";
-
-        // Nettoyage du formulaire 
-        form.reset()
-      });
-
-      // Ajouter le bouton au message de validation
-      successMessage.appendChild(closeButton);
+    if (validateFormFields(formData, form)) {
+      showSuccessMessage(form);
     }
   });
 });
